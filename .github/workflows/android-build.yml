@@ -29,6 +29,9 @@ jobs:
     - name: Build Android debug APK
       run: cd android && ./gradlew assembleDebug
 
+    - name: List APK contents
+      run: ls -la android/app/build/outputs/apk/debug/
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v3
       with:
