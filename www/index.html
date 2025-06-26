@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic To-Do App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Tasks</h1>
+            <div class="controls">
+                <button id="theme-switcher"><i class="fas fa-sun"></i></button>
+            </div>
+        </header>
+
+        <div class="progress-container">
+            <div class="progress-bar-wrapper">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <span id="progress-text">0%</span>
+        </div>
+
+        <form id="todo-form">
+            <div class="input-group">
+                <input type="text" id="todo-input" placeholder="Add a new task..." required>
+                <input type="datetime-local" id="reminder-input" title="Set a reminder">
+                <select id="priority-input" title="Set priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+                <select id="recurrence-input" title="Set recurrence">
+                    <option value="none">None</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+                <button type="submit"><i class="fas fa-plus"></i> Add</button>
+            </div>
+            <div class="input-group-bottom">
+                <input type="text" id="tags-input" placeholder="Add tags, comma separated...">
+                <textarea id="notes-input" placeholder="Add notes..."></textarea>
+            </div>
+        </form>
+
+        <div class="toolbar">
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="active">Active</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="archived">Archived</button>
+            </div>
+            <div id="tag-filters" class="tag-filters"></div>
+            <div class="search-sort">
+                <input type="text" id="search-input" placeholder="Search...">
+                <button id="sort-by-date"><i class="fas fa-sort-amount-down"></i> Sort by Date</button>
+            </div>
+        </div>
+
+        <ul id="todo-list"></ul>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Edit Task</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-todo-id">
+                <input type="text" id="edit-todo-input" required>
+                <input type="datetime-local" id="edit-reminder-input">
+                <select id="edit-priority-input">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+                <select id="edit-recurrence-input">
+                    <option value="none">None</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+                <textarea id="edit-notes-input"></textarea>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h2>Are you sure?</h2>
+            <p>Do you really want to delete this task? This process cannot be undone.</p>
+            <div class="modal-actions">
+                <button id="confirm-delete-btn">Delete</button>
+                <button id="cancel-delete-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

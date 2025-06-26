@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ModernTodoApp</string>
+    <string name="title_activity_main">ModernTodoApp</string>
+    <string name="package_name">com.yourcompany.moderntodo</string>
+    <string name="custom_url_scheme">com.yourcompany.moderntodo</string>
+</resources>
