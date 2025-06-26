@@ -52,11 +52,13 @@
                 <button class="filter-btn" data-filter="active">Active</button>
                 <button class="filter-btn" data-filter="completed">Completed</button>
                 <button class="filter-btn" data-filter="archived">Archived</button>
+                <button id="clear-filters-btn" title="Clear All Filters"><i class="fas fa-filter-circle-xmark"></i> Clear Filters</button>
             </div>
             <div id="tag-filters" class="tag-filters"></div>
             <div class="search-sort">
                 <input type="text" id="search-input" placeholder="Search...">
                 <button id="sort-by-date"><i class="fas fa-sort-amount-down"></i> Sort by Date</button>
+                <button id="sort-by-priority"><i class="fas fa-sort"></i> Sort by Priority</button>
                 <button id="export-tasks-btn" title="Export Tasks"><i class="fas fa-download"></i> Export</button>
                 <input type="file" id="import-tasks-input" accept=".json" style="display: none;">
                 <button id="import-tasks-btn" title="Import Tasks"><i class="fas fa-upload"></i> Import</button>

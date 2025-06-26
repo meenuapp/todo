@@ -135,13 +135,19 @@ h1 {
 
 .search-sort { display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end; }
 #search-input { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color); }
-#sort-by-date, #export-tasks-btn, #import-tasks-btn {
+#sort-by-date, #sort-by-priority, #export-tasks-btn, #import-tasks-btn, #clear-filters-btn {
     background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
 }
 
-#export-tasks-btn:hover, #import-tasks-btn:hover {
+#sort-by-priority:hover, #export-tasks-btn:hover, #import-tasks-btn:hover, #clear-filters-btn:hover {
     background-color: var(--primary-color);
     color: white;
+}
+
+#todo-list li.fade-out {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 #todo-list li {

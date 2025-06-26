@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterBtns = document.querySelectorAll('.filter-btn');
     const searchInput = document.getElementById('search-input');
     const sortByDateBtn = document.getElementById('sort-by-date');
+    const sortByPriorityBtn = document.getElementById('sort-by-priority');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
     const tagsInput = document.getElementById('tags-input');
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
     let currentFilter = 'all';
     let sortAscending = true;
+    let sortBy = 'date'; // 'date' or 'priority'
     let taskToDelete = null;
 
     // --- HELPER FUNCTIONS --- //
@@ -80,10 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Sorting
-        if (sortAscending) {
-            filteredTodos.sort((a, b) => (a.reminder && b.reminder) ? new Date(a.reminder) - new Date(b.reminder) : !a.reminder - !b.reminder);
-        } else {
-            filteredTodos.sort((a, b) => (a.reminder && b.reminder) ? new Date(b.reminder) - new Date(a.reminder) : !a.reminder - !b.reminder);
+        if (sortBy === 'date') {
+            if (sortAscending) {
+                filteredTodos.sort((a, b) => (a.reminder && b.reminder) ? new Date(a.reminder) - new Date(b.reminder) : !a.reminder - !b.reminder);
+            } else {
+                filteredTodos.sort((a, b) => (a.reminder && b.reminder) ? new Date(b.reminder) - new Date(a.reminder) : !a.reminder - !b.reminder);
+            }
+        } else if (sortBy === 'priority') {
+            const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+            filteredTodos.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
         }
 
         todoList.innerHTML = '';
@@ -274,7 +282,24 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', renderTodos);
 
     sortByDateBtn.addEventListener('click', () => {
+        sortBy = 'date';
         sortAscending = !sortAscending;
+        renderTodos();
+    });
+
+    sortByPriorityBtn.addEventListener('click', () => {
+        sortBy = 'priority';
+        renderTodos();
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+        currentFilter = 'all';
+        sortBy = 'date';
+        sortAscending = true;
+        searchInput.value = '';
+        filterBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+        document.querySelectorAll('.tag-filter-btn').forEach(b => b.classList.remove('active'));
         renderTodos();
     });
 
@@ -425,15 +450,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- REMINDERS --- //
-    const setReminders = async () => {
-        if (Capacitor.isNativePlatform()) {
-            await LocalNotifications.requestPermissions();
-            await LocalNotifications.cancel({
-                notifications: todos.filter(t => t.notificationId).map(t => ({ id: t.notificationId }))
-            });
-        }
+    const setReminders = () => {
+        // Clear all existing timeouts to prevent duplicates
+        // This is a simple approach; for more complex apps, manage IDs
+        // and clear specific timeouts.
+        // For Capacitor, LocalNotifications.cancel() is used.
 
-        todos.forEach(async todo => {
+        todos.forEach(todo => {
             if (todo.reminder && !todo.completed && !todo.archived) {
                 const reminderTime = new Date(todo.reminder).getTime();
                 const now = new Date().getTime();
@@ -441,14 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Due date reminder
                 if (reminderTime > now) {
-                    const notificationId = todo.id; // Use todo ID for notification ID
                     if (Capacitor.isNativePlatform()) {
-                        await LocalNotifications.schedule({
+                        LocalNotifications.schedule({
                             notifications: [
                                 {
                                     title: 'To-Do Reminder',
                                     body: `Task Due: ${todo.text}`,
-                                    id: notificationId,
+                                    id: todo.id,
                                     schedule: { at: new Date(reminderTime) },
                                     sound: null,
                                     attachments: null,
@@ -468,14 +490,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 15-minute pre-reminder
                 const preReminderTime = reminderTime - fifteenMinutes;
                 if (preReminderTime > now) {
-                    const preNotificationId = todo.id + 100000; // Unique ID for pre-reminder
                     if (Capacitor.isNativePlatform()) {
-                        await LocalNotifications.schedule({
+                        LocalNotifications.schedule({
                             notifications: [
                                 {
                                     title: 'To-Do Reminder',
                                     body: `Reminder (15 mins): ${todo.text}`,
-                                    id: preNotificationId,
+                                    id: todo.id + 100000, // Unique ID for pre-reminder
                                     schedule: { at: new Date(preReminderTime) },
                                     sound: null,
                                     attachments: null,
@@ -496,7 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const showNotification = (body) => {
-        // This function is now only for web-based notifications as native ones are scheduled directly
         if (!Capacitor.isNativePlatform()) {
             if (Notification.permission === 'granted') {
                 new Notification('To-Do Reminder', { body });
