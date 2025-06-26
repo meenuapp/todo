@@ -1,6 +1,3 @@
-import { LocalNotifications } from '@capacitor/local-notifications';
-import { Capacitor } from '@capacitor/core';
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM ELEMENTS --- //
     const todoForm = document.getElementById('todo-form');
@@ -18,6 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressText = document.getElementById('progress-text');
     const tagsInput = document.getElementById('tags-input');
     const tagFilters = document.getElementById('tag-filters');
+
+    const exportTasksBtn = document.getElementById('export-tasks-btn');
+    const importTasksInput = document.getElementById('import-tasks-input');
+    const importTasksBtn = document.getElementById('import-tasks-btn');
 
     // Modals
     const editModal = document.getElementById('edit-modal');
@@ -440,8 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Due date reminder
                 if (reminderTime > now) {
-                    const notificationId = Math.floor(Math.random() * 100000);
-                    todo.notificationId = notificationId; // Store notification ID
+                    const notificationId = todo.id; // Use todo ID for notification ID
                     if (Capacitor.isNativePlatform()) {
                         await LocalNotifications.schedule({
                             notifications: [
@@ -468,8 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 15-minute pre-reminder
                 const preReminderTime = reminderTime - fifteenMinutes;
                 if (preReminderTime > now) {
-                    const preNotificationId = Math.floor(Math.random() * 100000) + 1; // Ensure unique ID
-                    todo.preNotificationId = preNotificationId; // Store pre-notification ID
+                    const preNotificationId = todo.id + 100000; // Unique ID for pre-reminder
                     if (Capacitor.isNativePlatform()) {
                         await LocalNotifications.schedule({
                             notifications: [
@@ -494,7 +493,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        saveTodos(); // Save notification IDs
     };
 
     const showNotification = (body) => {
@@ -536,6 +534,50 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
+
+    // --- EXPORT/IMPORT --- //
+    exportTasksBtn.addEventListener('click', () => {
+        const dataStr = JSON.stringify(todos, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'todo-app-tasks.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    importTasksBtn.addEventListener('click', () => {
+        importTasksInput.click(); // Trigger the hidden file input
+    });
+
+    importTasksInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedTodos = JSON.parse(e.target.result);
+                if (Array.isArray(importedTodos)) {
+                    if (confirm('Importing tasks will replace your current tasks. Continue?')) {
+                        todos = importedTodos;
+                        saveTodos();
+                        renderTodos();
+                        alert('Tasks imported successfully!');
+                    }
+                } else {
+                    alert('Invalid JSON file format. Please select a file containing a JSON array of tasks.');
+                }
+            } catch (error) {
+                alert('Error parsing JSON file. Please ensure it is a valid JSON format.');
+                console.error('Error importing tasks:', error);
+            }
+        };
+        reader.readAsText(file);
+    });
 
     // --- INITIALIZATION --- //
     renderTodos();
